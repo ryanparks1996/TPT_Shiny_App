@@ -8,3 +8,6 @@ This app was built in R using the Shiny package. In addition to the app.R file, 
 This project has been a great learning tool for using the shiny package and in thinking critically about design choices. I still have a ways to go in making the application look attractive, but this has been a great stepping stone towards that goal. To a lesser extent, this project has allowed me to further practice the ggplot2 R package and its grammar of graphics.
 
 As of 10/28/25, the checkbox for selecting monthly averages does not actually do anything. Most of the code is there in the helpers.R file, but getting this fully functional will take a bit longer, and I need to spend my very limited time on other projects. I will come back to this in the near future.
+
+Run this code remotely using the runGitHub() function from the Shiny package.
+copy and paste the following: shiny::runGitHub("TPT_Shiny_App", "ryanparks1996")
