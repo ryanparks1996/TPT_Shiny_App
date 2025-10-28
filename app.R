@@ -89,6 +89,7 @@ server <- function(input, output) {
   
   # Interactive drill down from region -> district -> site---- 
   region <- reactive({
+    req(input$upload)
     if (input$region != "All") {
       filter(TPT_Report, Region == input$region)
     } else return(TPT_Report)
