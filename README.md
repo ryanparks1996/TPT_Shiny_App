@@ -11,3 +11,5 @@ As of 10/28/25, the checkbox for selecting monthly averages does not actually do
 
 Run this code remotely using the runGitHub() function from the Shiny package.
 copy and paste the following: shiny::runGitHub("TPT_Shiny_App", "ryanparks1996")
+
+2/28/25 CODE WILL NOT RUN REMOTELY UNTIL I REMOVE ALL REFERENCES TO A DF IN A PRIOR BUILD
