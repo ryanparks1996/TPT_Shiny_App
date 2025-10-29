@@ -10,7 +10,7 @@ This project has been a fantastic learning tool for using the shiny package and 
 
 As of 10/28/25, the checkbox for selecting monthly averages does not actually do anything. Most of the code is there in the helpers.R file, but getting this fully functional will take a bit longer, and I need to spend my very limited time on other projects. I will come back to this in the near future.
 
-Run this code remotely using the runGitHub() function from the Shiny package.
+Run this code remotely using the runGitHub() function in R or any R IDE. (Requires shiny package)
 
 Copy and paste the following: shiny::runGitHub("TPT_Shiny_App", "ryanparks1996")
 
