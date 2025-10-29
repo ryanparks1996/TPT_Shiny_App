@@ -21,5 +21,3 @@ If you get an error saying that the program requires "package_name" type the fol
 install.packages('package_name')
 
 You may need to repeat this process a couple times until all packages are installed. 
-
-10/29/25 Still not working
