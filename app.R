@@ -23,22 +23,22 @@ ui <- page_fluid(
   ),
   
   #layout_columns(
-    #col_widths = 4,
-    # Select region----
-    #selectInput(
-      #"region",
-      #label = "Select region",
-     # choices = c("All", sort(unique(TPT_Report$Region)))
-    #),
-    
-    layout_columns(
-      col_widths = 4,
-      # Select region (dynamic ui)----
-      selectInput(
-        "region",
-        label = "Select region",
-        choices = NULL
-      ),
+  #col_widths = 4,
+  # Select region----
+  #selectInput(
+  #"region",
+  #label = "Select region",
+  # choices = c("All", sort(unique(TPT_Report$Region)))
+  #),
+  
+  layout_columns(
+    col_widths = 4,
+    # Select region (dynamic ui)----
+    selectInput(
+      "region",
+      label = "Select region",
+      choices = NULL
+    ),
     
     # Select district (dynamic ui)----
     selectInput(
@@ -56,12 +56,12 @@ ui <- page_fluid(
     
     # Select time frame----
     #sliderInput(
-      #"timeRange",
-     # label = "Select range of weeks",
+    #"timeRange",
+    # label = "Select range of weeks",
     #  min = 1,
-      # Each week the max number of weeks will increase
-      #max = max(TPT_Report$Week),
-     # value = c(1, max(TPT_Report$Week))
+    # Each week the max number of weeks will increase
+    #max = max(TPT_Report$Week),
+    # value = c(1, max(TPT_Report$Week))
     #),
     # Select time frame (dynamic ui)----
     sliderInput(
@@ -183,7 +183,7 @@ server <- function(input, output) {
     maxWeek <- max(data()$Week)
     updateSliderInput(inputId = "timeRange", max = maxWeek)
   })
-
+  
   output$plot <- renderPlot({
     req(input$upload)
     #filtering data by time range selected
@@ -208,7 +208,7 @@ server <- function(input, output) {
       TPT_Plot <- ggplot(data=selectedData, 
                          aes(x = Week, 
                              y = TPT))
-        
+      
       TPT_Plot <- TPT_Plot + geom_line() +
         geom_point(aes(color=color_condition), size = 3) +
         scale_color_discrete(labels = c("red" = "Outside range", 
@@ -226,8 +226,8 @@ server <- function(input, output) {
            subtitle = paste("Region:", input$region, 
                             "\t \t District:", input$district, 
                             "\t \t Site:", input$site,
-                             "\t \t Median TPT:", input$allSites)
-           ) 
+                            "\t \t Median TPT:", input$allSites)
+      ) 
     
     TPT_Plot
   })
@@ -243,7 +243,7 @@ server <- function(input, output) {
     dataset <- site() %>%
       filter(Week >= input$timeRange[1] &
                Week <= input$timeRange[2]) %>%
-        select(TPT)
+      select(TPT)
     
     summary(dataset)
   })
