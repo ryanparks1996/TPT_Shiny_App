@@ -22,17 +22,8 @@ ui <- page_fluid(
     fileInput("upload", NULL, accept = ".xlsx")
   ),
   
-  #layout_columns(
-  #col_widths = 4,
-  # Select region----
-  #selectInput(
-  #"region",
-  #label = "Select region",
-  # choices = c("All", sort(unique(TPT_Report$Region)))
-  #),
-  
   layout_columns(
-    col_widths = 4,
+    col_widths = 3,
     # Select region (dynamic ui)----
     selectInput(
       "region",
@@ -40,10 +31,17 @@ ui <- page_fluid(
       choices = NULL
     ),
     
-    # Select district (dynamic ui)----
+    # Select district manager (dynamic ui)----
     selectInput(
       "district",
-      label = "Select district",
+      label = "Select DM",
+      choices = NULL
+    ),
+    
+    # Select district tech (dynamic ui)----
+    selectInput(
+      "districtTech",
+      label = "Select DT",
       choices = NULL
     ),
     
@@ -54,15 +52,6 @@ ui <- page_fluid(
       choices = NULL
     ),
     
-    # Select time frame----
-    #sliderInput(
-    #"timeRange",
-    # label = "Select range of weeks",
-    #  min = 1,
-    # Each week the max number of weeks will increase
-    #max = max(TPT_Report$Week),
-    # value = c(1, max(TPT_Report$Week))
-    #),
     # Select time frame (dynamic ui)----
     sliderInput(
       "timeRange",
@@ -81,12 +70,12 @@ ui <- page_fluid(
     ),
     
     # Toggle to select weekly averages across all selected stores----
-    # Currently disabled 
-    checkboxInput(
-      "monthly",
-      label = "Monthly Averages (CURRENTLY DEACTIVATED)",
-      value = FALSE
-    )
+    # CURRENTLY DISABLED  
+#    checkboxInput(
+#      "monthly",
+#      label = "Monthly Averages (CURRENTLY DEACTIVATED)",
+#      value = FALSE
+#    )
   ),
   
   tableOutput("head"),
@@ -101,14 +90,13 @@ server <- function(input, output) {
   # File upload wizard
   data <- reactive({
     req(input$upload)
-    
     filepath <- input$upload$datapath
-    if (!input$monthly) {
-      file_convert_to_tidy(filepath, "Week to Week")
-    } else { # Disabled function by always choosing 'Week to Week'
-      #file_convert_to_tidy(filepath, "Period to Period")
-      file_convert_to_tidy(filepath, "Week to Week")
-    }
+    file_convert_to_tidy(filepath, "Week to Week")
+    # CODE BELOW FOR FUTURE BUILD WITH MONTHLY AVERAGES
+  #  if (!input$monthly) {
+  #    file_convert_to_tidy(filepath, "Week to Week")
+  #  } else { #file_convert_to_tidy(filepath, "Period to Period")
+  #    }
   })
   
   
@@ -143,10 +131,25 @@ server <- function(input, output) {
     } else return(region()) 
   })
   
+  ## DISTRICT TECH ##
+  # Get list of DTs in a selected Region/District and update choices in program
+  observeEvent(district(), {
+    choices <- unique(district()$DT)
+    updateSelectInput(inputId = "districtTech", choices = c("All", sort(choices)))
+  })
+  
+  districtTech <- reactive({
+    req(input$districtTech)
+    # Filter data by selected DT 
+    if (input$districtTech != "All") {
+      filter(district(), DT == input$districtTech) 
+    } else return(district()) 
+  })
+  
   ## SITE ##
   # Get list of Sites in a selected Region/District and update choices in program
-  observeEvent(district(), {
-    choices <- unique(district()$`Site name`)  
+  observeEvent(districtTech(), {
+    choices <- unique(districtTech()$`Site name`)  
     updateSelectInput(inputId = "site", choices = c("All", sort(choices)))
   })
   
@@ -165,7 +168,7 @@ server <- function(input, output) {
     if (input$allSites) {
       weeklyData <- weeklyData %>%
         group_by(Week) %>%
-        mutate(TPT = median(TPT)) # Median used due to large outliers
+        mutate(TPT = median(TPT, na.rm = TRUE)) # Median used due to large outliers
     } 
     return(weeklyData)
   })
@@ -200,8 +203,8 @@ server <- function(input, output) {
                        aes(x = factor(Week), 
                            y = TPT,
                            color = color_condition)) +
-      scale_color_discrete(labels = c("red" = "Outside range", 
-                                      "blue" = "Inside range"))
+      scale_color_discrete(labels = c("blue" = "Outside range", 
+                                      "red" = "Inside range"))
     
     # Plot line plot for averages and simple scatter plot otherwise
     if (input$allSites) {
@@ -211,8 +214,8 @@ server <- function(input, output) {
       
       TPT_Plot <- TPT_Plot + geom_line() +
         geom_point(aes(color=color_condition), size = 3) +
-        scale_color_discrete(labels = c("red" = "Outside range", 
-                                        "blue" = "Inside range"))
+        scale_color_discrete(labels = c("blue" = "Outside range", 
+                                        "red" = "Inside range"))
     } else {
       TPT_Plot <- TPT_Plot + geom_point()
     }
