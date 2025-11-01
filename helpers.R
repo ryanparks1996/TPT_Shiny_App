@@ -21,8 +21,11 @@ file_convert_to_tidy <- function(file, sheetSelected) {
   new_file$DT <- toupper(new_file$DT)
   new_file$`Site name` <- toupper(new_file$`Site name`)
   
-  # Note: some stores dont have DTs so 'NA' will be assigned
-  #new_file$DT <- sub(NULL, "NA")
+  # Note: some times stores will not have DT/DM 
+  # This will fill in empty data with "NA"
+  new_file$RT[is.na(new_file$RT)] <- "NA"
+  new_file$DT[is.na(new_file$DT)] <- "NA"
+  new_file$DM[is.na(new_file$DM)] <- "NA"
   
   #Average_TPT
   #remove all the monthly averages
@@ -45,10 +48,8 @@ file_convert_to_tidy <- function(file, sheetSelected) {
     for (i in c(17:ncol(new_file))) {
       names(new_file)[i] <- paste("Week", i-5)
     }
-    new_file %>%
-      add_column(`Week 11`, .after = 16)
     
-    new_file_cleaned <- new_file #%>% na.omit()
+    new_file_cleaned <- new_file 
     
     # Create tidy version of data
     new_file_Tidy <- new_file_cleaned %>%

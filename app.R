@@ -142,7 +142,7 @@ server <- function(input, output) {
     req(input$districtTech)
     # Filter data by selected DT 
     if (input$districtTech != "All") {
-      filter(district(), DT == input$districtTech) 
+      filter(district(), DT == input$districtTech)
     } else return(district()) 
   })
   
@@ -154,11 +154,10 @@ server <- function(input, output) {
   })
   
   site <- reactive({
-    req(input$site)
     #Filter data by selected Site
     if (input$site != "All") {
-      filter(district(), `Site name` == input$site) 
-    } else return(district())
+      filter(districtTech(), `Site name` == input$site) 
+    } else return(districtTech())
   })
   # End of drill down-----------------------------------------------------------
   
@@ -195,11 +194,14 @@ server <- function(input, output) {
                Week <= input$timeRange[2])
     
     # Create data frame that contains horizontal line of 3 (goal TPT)
+    # and upper (3.11) / lower (2.89) bound for acceptable TPT values
     # (Used in plot(s) as reference line)
-    goal <- data.frame(yintercept=3, Goal = "3.0 TPT")
+    goal <- data.frame(yintercept=c(2.89, 3, 3.11), 
+                       Name = c("2.89 TPT", "3.0 TPT", "3.11 TPT"))
+    #goal <- data.frame(yintercept=3, Goal = "3.0 TPT")
     
     # Create ggplot object----
-    TPT_Plot <- ggplot(data = selectedData, 
+    TPT_Plot <- ggplot(data = subset(selectedData, !is.na(TPT)), 
                        aes(x = factor(Week), 
                            y = TPT,
                            color = color_condition)) +
@@ -208,7 +210,7 @@ server <- function(input, output) {
     
     # Plot line plot for averages and simple scatter plot otherwise
     if (input$allSites) {
-      TPT_Plot <- ggplot(data=selectedData, 
+      TPT_Plot <- ggplot(data = subset(selectedData, !is.na(TPT)), 
                          aes(x = Week, 
                              y = TPT))
       
@@ -221,8 +223,12 @@ server <- function(input, output) {
     }
     
     TPT_Plot <- TPT_Plot +
-      geom_hline(aes(yintercept=yintercept, linetype="3.0"), goal) + 
-      scale_linetype_manual(name = "Goal", values = "dashed") +
+      geom_hline(aes(yintercept=c(yintercept[1], yintercept[2], yintercept[3]), 
+                     linetype=c("Lower bound", "3.0", "Upper bound")), goal) +
+      scale_linetype_manual(name = "Goal", 
+                            values = c("Lower bound" = 2,
+                                       "3.0" = 3, 
+                                       "Upper bound" = 2)) +
       labs(title = "Weekly TPT",
            x = "Week",
            color = "TPT",
