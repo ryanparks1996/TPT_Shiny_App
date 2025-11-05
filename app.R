@@ -11,6 +11,10 @@ library(readxl)
 # Source helper functions----
 source("helpers.R")
 
+# Convert excel date values to r date objects using function in helpers file
+# To be used in plots/tables
+week_formated <- get_dates("Average TPT Report November 03 2025.xlsx")
+
 
 # ------------------------------------------------------------------------------
 # Define UI for looking at weekly TPT reports 
@@ -200,7 +204,6 @@ server <- function(input, output) {
         (all(selectedData$TPT > 2.89 & selectedData$TPT < 3.11))) {
       selectedData['color_condition' == "blue"] <- "red"
       selectedData['color_condition' == "red"] <- "blue"
-      print(head(selectedData))
     }
     
     
@@ -244,9 +247,13 @@ server <- function(input, output) {
            x = "Week",
            color = "TPT",
            subtitle = paste("Region:", input$region, 
-                            "\t \t District:", input$district, 
+                            "\t \t District:", input$district,
+                            "\t \t District Tech:", input$districtTech,
                             "\t \t Site:", input$site,
-                            "\t \t Median TPT:", input$allSites)
+                            "\t \t ",
+                            format(week_formated[input$timeRange[1]]-7, "%m/%d/%y"),
+                            "to", 
+                            format(week_formated[input$timeRange[2]]-1, "%m/%d/%y"))
       ) 
     
     TPT_Plot
@@ -255,11 +262,17 @@ server <- function(input, output) {
   # Create table of summary statistics----
   output$summary <- renderPrint({
     req(input$upload)
-    
+
     cat("TPT Summary Statistics \rRegion:", input$region, 
-        "\rDistrict:", input$district, 
+        "\rDistrict:", input$district,
+        "\rDistrictTech:", input$districtTech,
         "\rSite:", input$site, 
-        "\rFrom: Week", input$timeRange[1], "to Week", input$timeRange[2], "\n")
+        "\rFrom:", 
+        # Dates in spreadsheet are on Mondays but weeks actually end on Sundays
+        format(week_formated[input$timeRange[1]]-7, "%m/%d/%y"),
+        "to", 
+        format(week_formated[input$timeRange[2]]-1, "%m/%d/%y"), "\n")
+    
     dataset <- site() %>%
       filter(Week >= input$timeRange[1] &
                Week <= input$timeRange[2]) %>%

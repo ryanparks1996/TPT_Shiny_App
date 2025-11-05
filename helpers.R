@@ -4,11 +4,12 @@ library('tidyr')
 library('janitor')
 library('janitor')
 library('tibble')
+library('lubridate')
 
 # Function to take in .xlsx file, convert to .csv file and make 'tidy'
 file_convert_to_tidy <- function(file, sheetSelected) {
   # Only supports sheets is Week to Week
-  #ADD Period to Period IN THE FUTURE
+  # ADD Period to Period IN THE FUTURE
   if (sheetSelected != "Week to Week") {
     stop("sheetSelected must be 'Week to Week'")
   }
@@ -22,13 +23,13 @@ file_convert_to_tidy <- function(file, sheetSelected) {
   new_file$`Site name` <- toupper(new_file$`Site name`)
   
   # Note: some times stores will not have DT/DM 
-  #This will fill in empty data with "NA"
+  # This will fill in empty data with "NA"
   new_file$RT[is.na(new_file$RT)] <- "NA"
   new_file$DT[is.na(new_file$DT)] <- "NA"
   new_file$DM[is.na(new_file$DM)] <- "NA"
   
-  #Average_TPT
-  #remove all the monthly averages
+  # Average_TPT
+  # Remove all the monthly averages
   if (sheetSelected == "Week to Week") {
     new_file <- new_file %>%
       select(-c("Pd 1", "Pd 2", "Pd 3", "Pd 4", "Pd 5", "Pd 6",
@@ -37,11 +38,11 @@ file_convert_to_tidy <- function(file, sheetSelected) {
     # Note: week 11 is missing from all stores
     `Week 11` <- rep(NULL, nrow(new_file))
     
-    #remove empty columns. Each week a new column is filled in
+    # Remove empty columns. Each week a new column is filled in
     new_file <- new_file %>%
       remove_empty(which = "cols") 
     
-    #correcting col names
+    # Correcting col names
     for (i in c(7:16)) {
       names(new_file)[i] <- paste("Week", i-6)
     }
@@ -76,3 +77,26 @@ file_convert_to_tidy <- function(file, sheetSelected) {
   
   return(new_file_Tidy)
 }
+
+####------------------------------------------------------------------------####
+
+# Function to convert excel date values to r Date
+get_dates <- function(file) {
+  # Read in file
+  new_file <- read_excel(file, sheet = "Week to Week ", range = "A4:BR464")
+  
+  # Remove all monthly averages
+  new_file <- new_file %>%
+    select(-c("Pd 1", "Pd 2", "Pd 3", "Pd 4", "Pd 5", "Pd 6", 
+              "Pd 7", "Pd 8", "Pd 9", "Pd 10", "Pd 11", "Pd 12"))
+  
+  # Save column names to a variable and convert from string to numeric
+  dates <- as.numeric(names(new_file)[7:ncol(new_file)])
+  
+  # Correct column names
+  dates_formated <- as.Date(dates, origin = "1899-12-30")
+  
+  return(dates_formated)
+}
+
+
