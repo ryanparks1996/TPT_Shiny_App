@@ -154,7 +154,7 @@ server <- function(input, output) {
   })
   
   site <- reactive({
-    #Filter data by selected Site
+    # Filter data by selected Site
     if (input$site != "All") {
       filter(districtTech(), `Site name` == input$site) 
     } else return(districtTech())
@@ -177,8 +177,9 @@ server <- function(input, output) {
   #(Used for color coding the plot)
   flaggedTPT <- reactive({
     averageAllStores() %>%
-      mutate(color_condition = ifelse(!(TPT >= 3.11 | TPT <= 2.89),"red", "blue"))
+      mutate(color_condition = if_else(!(TPT >= 3.11 | TPT <= 2.89),"red", "blue"))
   })
+
   
   # Adjust time range max value
   observeEvent(data(), {
@@ -193,19 +194,29 @@ server <- function(input, output) {
       filter(Week >= input$timeRange[1] &
                Week <= input$timeRange[2])
     
+    # Placeholder solution to the color coding issue.
+    # Reverse color is all values are inside or outside range
+    if ((all(selectedData$TPT <= 2.89)) | all(selectedData$TPT >= 3.11) |
+        (all(selectedData$TPT > 2.89 & selectedData$TPT < 3.11))) {
+      selectedData['color_condition' == "blue"] <- "red"
+      selectedData['color_condition' == "red"] <- "blue"
+      print(head(selectedData))
+    }
+    
+    
     # Create data frame that contains horizontal line of 3 (goal TPT)
     # and upper (3.11) / lower (2.89) bound for acceptable TPT values
     # (Used in plot(s) as reference line)
     goal <- data.frame(yintercept=c(2.89, 3, 3.11), 
                        Name = c("2.89 TPT", "3.0 TPT", "3.11 TPT"))
-    #goal <- data.frame(yintercept=3, Goal = "3.0 TPT")
     
     # Create ggplot object----
     TPT_Plot <- ggplot(data = subset(selectedData, !is.na(TPT)), 
                        aes(x = factor(Week), 
                            y = TPT,
                            color = color_condition)) +
-      scale_color_discrete(labels = c("blue" = "Outside range", 
+      # This works but should not need to be labeled backwards
+      scale_color_discrete(labels = c("blue" = "Outside range",
                                       "red" = "Inside range"))
     
     # Plot line plot for averages and simple scatter plot otherwise

@@ -22,7 +22,7 @@ file_convert_to_tidy <- function(file, sheetSelected) {
   new_file$`Site name` <- toupper(new_file$`Site name`)
   
   # Note: some times stores will not have DT/DM 
-  # This will fill in empty data with "NA"
+  #This will fill in empty data with "NA"
   new_file$RT[is.na(new_file$RT)] <- "NA"
   new_file$DT[is.na(new_file$DT)] <- "NA"
   new_file$DM[is.na(new_file$DM)] <- "NA"
@@ -76,6 +76,3 @@ file_convert_to_tidy <- function(file, sheetSelected) {
   
   return(new_file_Tidy)
 }
-
-#head(file_convert_to_tidy('C:\\Users\\ryans\\Documents\\TPT_Pro\\Average TPT Report October 20 2025.xlsx',
- #                    "Week to Week"))
