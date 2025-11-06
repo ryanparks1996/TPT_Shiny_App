@@ -19,3 +19,5 @@ If you get an error saying that the program requires "package_name" type the fol
 install.packages('package_name')
 
 You may need to repeat this process a couple times until all packages are installed. 
+
+Update (11/06/25): The application is now live on a dedicated Shiny server for use without needing a local R environment. However, due to the limited allotted active time (25 hr/month), the link to the server will only be available upon request.
